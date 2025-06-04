@@ -1,0 +1,42 @@
+﻿@model WebApplication5.Models.Postavki
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Postavki</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DatePostavki)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DatePostavki)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.PricePostavki)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.PricePostavki)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Mebel)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Mebel.IdMebel)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Postavchika)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Postavchika.IdPostavchik)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.IdPostavki">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

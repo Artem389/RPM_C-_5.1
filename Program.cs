@@ -16,7 +16,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Home/AccessDenied";
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireStaffRole", policy => policy.RequireRole("Staff"));
+    options.AddPolicy("ReadOnly", policy => policy.RequireAuthenticatedUser());
+});
 
 var app = builder.Build();
 

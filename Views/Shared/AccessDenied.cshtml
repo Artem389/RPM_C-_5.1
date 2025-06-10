@@ -1,0 +1,61 @@
+﻿@using System.Security.Claims
+@{
+    ViewData["Title"] = "Доступ запрещен";
+}
+
+<div class="alert alert-danger">
+    <h2>@ViewData["Title"]</h2>
+    <p>У вас недостаточно прав для доступа к этому разделу.</p>
+    <p>Ваша роль: @User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value</p>
+
+    @if (User.IsInRole("Client"))
+    {
+        <a asp-controller="Adresses" asp-action="List" class="btn btn-primary">
+            Перейти к просмотру адресов (только чтение)
+        </a>
+        <li></li>
+        <a asp-controller="Applications" asp-action="List" class="btn btn-primary">
+            Перейти к просмотру заявок (только чтение)
+        </a>
+        <li></li>
+        <a asp-controller="Categoris" asp-action="List" class="btn btn-primary">
+            Перейти к просмотру категорий (только чтение)
+        </a>
+        <li></li>
+        <a asp-controller="Clients" asp-action="List" class="btn btn-primary">
+            Перейти к просмотру клиентов (только чтение)
+        </a>
+        <li></li>
+        <a asp-controller="Mebels" asp-action="List" class="btn btn-primary">
+            Перейти к просмотру мебели (только чтение)
+        </a>
+        <li></li>
+        <a asp-controller="Pasports" asp-action="List" class="btn btn-primary">
+            Перейти к просмотру паспортов (только чтение)
+        </a>
+        <li></li>
+        <a asp-controller="Positions" asp-action="List" class="btn btn-primary">
+            Перейти к просмотру должностей (только чтение)
+        </a>
+        <li></li>
+        <a asp-controller="Postavhiks" asp-action="List" class="btn btn-primary">
+            Перейти к просмотру поставщиков (только чтение)
+        </a>
+        <li></li>
+        <a asp-controller="Postavkis" asp-action="List" class="btn btn-primary">
+            Перейти к просмотру поставок (только чтение)
+        </a>
+        <li></li>
+        <a asp-controller="SostavZakazas" asp-action="List" class="btn btn-primary">
+            Перейти к просмотру состава заказов (только чтение)
+        </a>
+        <li></li>
+        <a asp-controller="Staffs" asp-action="List" class="btn btn-primary">
+            Перейти к просмотру сотрудников (только чтение)
+        </a>
+    }
+    <li></li>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+        Вернуться на главную
+    </a>
+</div>

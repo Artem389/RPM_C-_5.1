@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication5.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApplication5.Controllers
 {
+    [Authorize]
     public class PasportsController : Controller
     {
         private readonly MedelStoreContext _context;
@@ -18,13 +18,24 @@ namespace WebApplication5.Controllers
             _context = context;
         }
 
-        // GET: Pasports
+        // GET: Pasports (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Index()
         {
+            if (!User.IsInRole("Staff"))
+            {
+                return RedirectToAction("List");
+            }
             return View(await _context.Pasports.ToListAsync());
         }
 
-        // GET: Pasports/Details/5
+        // GET: Pasports/List (для всех авторизованных)
+        public async Task<IActionResult> List()
+        {
+            return View("ReadOnlyList", await _context.Pasports.ToListAsync());
+        }
+
+        // GET: Pasports/Details/5 (для всех авторизованных)
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -42,15 +53,15 @@ namespace WebApplication5.Controllers
             return View(pasport);
         }
 
-        // GET: Pasports/Create
+        // GET: Pasports/Create (только для Staff)
+        [Authorize(Roles = "Staff")]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Pasports/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Pasports/Create (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdPasports,Serial,Number,DateOfIssue")] Pasport pasport)
@@ -64,7 +75,8 @@ namespace WebApplication5.Controllers
             return View(pasport);
         }
 
-        // GET: Pasports/Edit/5
+        // GET: Pasports/Edit/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -80,9 +92,8 @@ namespace WebApplication5.Controllers
             return View(pasport);
         }
 
-        // POST: Pasports/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Pasports/Edit/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdPasports,Serial,Number,DateOfIssue")] Pasport pasport)
@@ -115,7 +126,8 @@ namespace WebApplication5.Controllers
             return View(pasport);
         }
 
-        // GET: Pasports/Delete/5
+        // GET: Pasports/Delete/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -133,7 +145,8 @@ namespace WebApplication5.Controllers
             return View(pasport);
         }
 
-        // POST: Pasports/Delete/5
+        // POST: Pasports/Delete/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -142,9 +155,9 @@ namespace WebApplication5.Controllers
             if (pasport != null)
             {
                 _context.Pasports.Remove(pasport);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

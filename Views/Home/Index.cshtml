@@ -1,41 +1,104 @@
 ﻿@using System.Security.Claims
-
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
     @if (User.Identity.IsAuthenticated)
     {
         <p>Вы вошли как: @User.Identity.Name (Роль: @User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value)</p>
         <form asp-controller="Home" asp-action="LogOut" method="post">
             <button type="submit" class="btn btn-danger">Выйти</button>
         </form>
-
-        @if (User.IsInRole("Staff"))
-        {
-            <a asp-controller="Admin" asp-action="Index" class="btn btn-primary">Панель администратора</a>
-        }
     }
     else
     {
         <a asp-controller="Home" asp-action="SignIn" class="btn btn-primary">Войти</a>
         <a asp-controller="Home" asp-action="SignUp" class="btn btn-secondary">Зарегистрироваться</a>
     }
-    <ul>
-        <li><a asp-controller="Adresses" asp-action="Index">Пользователи</a></li>
-        <li><a asp-controller="Applications" asp-action="Index">Заявки</a></li>
-        <li><a asp-controller="Categoris" asp-action="Index">Категории</a></li>
-        <li><a asp-controller="Clients" asp-action="Index">Клиенты</a></li>
-        <li><a asp-controller="Mebels" asp-action="Index">Мебель</a></li>
-        <li><a asp-controller="Pasports" asp-action="Index">Паспорта</a></li>
-        <li><a asp-controller="Positions" asp-action="Index">Должности</a></li>
-        <li><a asp-controller="Postavhiks" asp-action="Index">Поставщики</a></li>
-        <li><a asp-controller="Postavkis" asp-action="Index">Поставки</a></li>
-        <li><a asp-controller="SostavZakazas" asp-action="Index">Состав заказа</a></li>
-        <li><a asp-controller="Staffs" asp-action="Index">Сотрудники</a></li>
-    </ul>
 </div>
 
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="container mt-4">
+        <h2>Меню</h2>
+        <ul class="list-group">
+            @if (User.IsInRole("Staff"))
+            {
+                <!-- Полный доступ для администраторов -->
+                <li class="list-group-item">
+                    <a asp-controller="Adresses" asp-action="Index">Адреса (полный доступ)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Applications" asp-action="Index">Заявки (полный доступ)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Categoris" asp-action="Index">Категории (полный доступ)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Clients" asp-action="Index">Клиенты (полный доступ)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Mebels" asp-action="Index">Мебель (полный доступ)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Pasports" asp-action="Index">Паспорта (полный доступ)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Positions" asp-action="Index">Должности (полный доступ)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Postavhiks" asp-action="Index">Поставщикики (полный доступ)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Postavkis" asp-action="Index">Поставки (полный доступ)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="SostavZakazas" asp-action="Index">Состав заказа (полный доступ)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Staffs" asp-action="Index">Сотрудникики (полный доступ)</a>
+                </li>
+            }
+            else
+            {
+                <!-- Только просмотр для клиентов -->
+                <li class="list-group-item">
+                    <a asp-controller="Adresses" asp-action="Index">Адреса только просмотр)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Applications" asp-action="Index">Заявки (только просмотр)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Categoris" asp-action="Index">Категории (только просмотр)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Clients" asp-action="Index">Клиенты (только просмотр)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Mebels" asp-action="Index">Мебель (только просмотр)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Pasports" asp-action="Index">Паспорта (только просмотр)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Positions" asp-action="Index">Должности (только просмотр)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Postavhiks" asp-action="Index">Поставщикики (только просмотр)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Postavkis" asp-action="Index">Поставки только просмотр)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="SostavZakazas" asp-action="Index">Состав заказа (только просмотр)</a>
+                </li>
+                <li class="list-group-item">
+                    <a asp-controller="Staffs" asp-action="Index">Сотрудникики (только просмотр)</a>
+                </li>
+                
+            }
+        </ul>
+    </div>
+}

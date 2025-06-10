@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication5.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApplication5.Controllers
 {
+    [Authorize] // Требуем авторизации для всех методов
     public class AdressesController : Controller
     {
         private readonly MedelStoreContext _context;
@@ -18,13 +20,25 @@ namespace WebApplication5.Controllers
             _context = context;
         }
 
-        // GET: Adresses
+        // GET: Adresses (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Index()
         {
+            if (!User.IsInRole("Staff"))
+            {
+                // Для клиентов перенаправляем на версию только для чтения
+                return RedirectToAction("List");
+            }
             return View(await _context.Adresses.ToListAsync());
         }
 
-        // GET: Adresses/Details/5
+        // GET: Adresses/List (для всех авторизованных)
+        public async Task<IActionResult> List()
+        {
+            return View("ReadOnlyList", await _context.Adresses.ToListAsync());
+        }
+
+        // GET: Adresses/Details/5 (для всех авторизованных)
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -42,15 +56,15 @@ namespace WebApplication5.Controllers
             return View(adress);
         }
 
-        // GET: Adresses/Create
+        // GET: Adresses/Create (только для Staff)
+        [Authorize(Roles = "Staff")]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Adresses/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Adresses/Create (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdAdress,Street,City,Country")] Adress adress)
@@ -64,7 +78,8 @@ namespace WebApplication5.Controllers
             return View(adress);
         }
 
-        // GET: Adresses/Edit/5
+        // GET: Adresses/Edit/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -80,9 +95,8 @@ namespace WebApplication5.Controllers
             return View(adress);
         }
 
-        // POST: Adresses/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Adresses/Edit/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdAdress,Street,City,Country")] Adress adress)
@@ -115,7 +129,8 @@ namespace WebApplication5.Controllers
             return View(adress);
         }
 
-        // GET: Adresses/Delete/5
+        // GET: Adresses/Delete/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -133,7 +148,8 @@ namespace WebApplication5.Controllers
             return View(adress);
         }
 
-        // POST: Adresses/Delete/5
+        // POST: Adresses/Delete/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

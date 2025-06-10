@@ -1,0 +1,48 @@
+﻿@model IEnumerable<WebApplication5.Models.Postavki>
+
+@{
+    ViewData["Title"] = "Список поставок (только просмотр)";
+}
+
+<div class="container">
+    <h2>@ViewData["Title"]</h2>
+
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Дата поставки</th>
+                <th>Цена поставки</th>
+                <th>Товар</th>
+                <th>Поставщик</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.DatePostavki)</td>
+                    <td>@Html.DisplayFor(modelItem => item.PricePostavki)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Mebel.ProductName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Postavchika.Name)</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.IdPostavki" class="btn btn-info btn-sm">Подробности</a>
+                        @if (User.IsInRole("Staff"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.IdPostavki" class="btn btn-primary btn-sm">Редактировать</a>
+                            <a asp-action="Delete" asp-route-id="@item.IdPostavki" class="btn btn-danger btn-sm">Удалить</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (User.IsInRole("Staff"))
+    {
+        <div class="mt-3">
+            <a asp-action="Create" class="btn btn-success">Добавить новую поставку</a>
+            <a asp-action="Index" class="btn btn-secondary">Полная версия (для администраторов)</a>
+        </div>
+    }
+</div>

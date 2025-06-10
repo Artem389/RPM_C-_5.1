@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication5.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApplication5.Controllers
 {
+    [Authorize]
     public class MebelsController : Controller
     {
         private readonly MedelStoreContext _context;
@@ -18,14 +19,33 @@ namespace WebApplication5.Controllers
             _context = context;
         }
 
-        // GET: Mebels
+        // GET: Mebels (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Index()
         {
-            var medelStoreContext = _context.Mebels.Include(m => m.Categori);
-            return View(await medelStoreContext.ToListAsync());
+            if (!User.IsInRole("Staff"))
+            {
+                return RedirectToAction("List");
+            }
+
+            var mebels = await _context.Mebels
+                .Include(m => m.Categori)
+                .ToListAsync();
+
+            return View(mebels);
         }
 
-        // GET: Mebels/Details/5
+        // GET: Mebels/List (для всех авторизованных)
+        public async Task<IActionResult> List()
+        {
+            var mebels = await _context.Mebels
+                .Include(m => m.Categori)
+                .ToListAsync();
+
+            return View("ReadOnlyList", mebels);
+        }
+
+        // GET: Mebels/Details/5 (для всех авторизованных)
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -36,6 +56,7 @@ namespace WebApplication5.Controllers
             var mebel = await _context.Mebels
                 .Include(m => m.Categori)
                 .FirstOrDefaultAsync(m => m.IdMebel == id);
+
             if (mebel == null)
             {
                 return NotFound();
@@ -44,16 +65,16 @@ namespace WebApplication5.Controllers
             return View(mebel);
         }
 
-        // GET: Mebels/Create
+        // GET: Mebels/Create (только для Staff)
+        [Authorize(Roles = "Staff")]
         public IActionResult Create()
         {
-            ViewData["CategoriId"] = new SelectList(_context.Categoris, "IdCategori", "IdCategori");
+            ViewData["CategoriId"] = new SelectList(_context.Categoris, "IdCategori", "NameCategori");
             return View();
         }
 
-        // POST: Mebels/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Mebels/Create (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdMebel,ProductName,CategoriId")] Mebel mebel)
@@ -64,11 +85,13 @@ namespace WebApplication5.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoriId"] = new SelectList(_context.Categoris, "IdCategori", "IdCategori", mebel.CategoriId);
+
+            ViewData["CategoriId"] = new SelectList(_context.Categoris, "IdCategori", "NameCategori", mebel.CategoriId);
             return View(mebel);
         }
 
-        // GET: Mebels/Edit/5
+        // GET: Mebels/Edit/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -81,13 +104,13 @@ namespace WebApplication5.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoriId"] = new SelectList(_context.Categoris, "IdCategori", "IdCategori", mebel.CategoriId);
+
+            ViewData["CategoriId"] = new SelectList(_context.Categoris, "IdCategori", "NameCategori", mebel.CategoriId);
             return View(mebel);
         }
 
-        // POST: Mebels/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Mebels/Edit/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdMebel,ProductName,CategoriId")] Mebel mebel)
@@ -117,11 +140,13 @@ namespace WebApplication5.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoriId"] = new SelectList(_context.Categoris, "IdCategori", "IdCategori", mebel.CategoriId);
+
+            ViewData["CategoriId"] = new SelectList(_context.Categoris, "IdCategori", "NameCategori", mebel.CategoriId);
             return View(mebel);
         }
 
-        // GET: Mebels/Delete/5
+        // GET: Mebels/Delete/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -132,6 +157,7 @@ namespace WebApplication5.Controllers
             var mebel = await _context.Mebels
                 .Include(m => m.Categori)
                 .FirstOrDefaultAsync(m => m.IdMebel == id);
+
             if (mebel == null)
             {
                 return NotFound();
@@ -140,7 +166,8 @@ namespace WebApplication5.Controllers
             return View(mebel);
         }
 
-        // POST: Mebels/Delete/5
+        // POST: Mebels/Delete/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -149,9 +176,9 @@ namespace WebApplication5.Controllers
             if (mebel != null)
             {
                 _context.Mebels.Remove(mebel);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

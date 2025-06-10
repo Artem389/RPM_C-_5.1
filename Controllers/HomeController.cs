@@ -13,6 +13,11 @@ namespace WebApplication5.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly MedelStoreContext _context;
 
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
         public HomeController(ILogger<HomeController> logger, MedelStoreContext context)
         {
             _logger = logger;

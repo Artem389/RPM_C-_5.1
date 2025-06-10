@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication5.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApplication5.Controllers
 {
+    [Authorize]
     public class StaffsController : Controller
     {
         private readonly MedelStoreContext _context;
@@ -18,14 +19,35 @@ namespace WebApplication5.Controllers
             _context = context;
         }
 
-        // GET: Staffs
+        // GET: Staffs (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Index()
         {
-            var medelStoreContext = _context.Staff.Include(s => s.Passport).Include(s => s.Positions);
-            return View(await medelStoreContext.ToListAsync());
+            if (!User.IsInRole("Staff"))
+            {
+                return RedirectToAction("List");
+            }
+
+            var staff = await _context.Staff
+                .Include(s => s.Passport)
+                .Include(s => s.Positions)
+                .ToListAsync();
+
+            return View(staff);
         }
 
-        // GET: Staffs/Details/5
+        // GET: Staffs/List (для всех авторизованных)
+        public async Task<IActionResult> List()
+        {
+            var staff = await _context.Staff
+                .Include(s => s.Passport)
+                .Include(s => s.Positions)
+                .ToListAsync();
+
+            return View("ReadOnlyList", staff);
+        }
+
+        // GET: Staffs/Details/5 (для всех авторизованных)
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -37,6 +59,7 @@ namespace WebApplication5.Controllers
                 .Include(s => s.Passport)
                 .Include(s => s.Positions)
                 .FirstOrDefaultAsync(m => m.IdStaff == id);
+
             if (staff == null)
             {
                 return NotFound();
@@ -45,17 +68,17 @@ namespace WebApplication5.Controllers
             return View(staff);
         }
 
-        // GET: Staffs/Create
+        // GET: Staffs/Create (только для Staff)
+        [Authorize(Roles = "Staff")]
         public IActionResult Create()
         {
-            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "IdPasports");
-            ViewData["PositionsId"] = new SelectList(_context.Positions, "IdPositions", "IdPositions");
+            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "Number");
+            ViewData["PositionsId"] = new SelectList(_context.Positions, "IdPositions", "Positions");
             return View();
         }
 
-        // POST: Staffs/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Staffs/Create (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdStaff,Suname,Name,Fatherland,PassportId,PositionsId")] Staff staff)
@@ -66,12 +89,14 @@ namespace WebApplication5.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "IdPasports", staff.PassportId);
-            ViewData["PositionsId"] = new SelectList(_context.Positions, "IdPositions", "IdPositions", staff.PositionsId);
+
+            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "Number", staff.PassportId);
+            ViewData["PositionsId"] = new SelectList(_context.Positions, "IdPositions", "Positions", staff.PositionsId);
             return View(staff);
         }
 
-        // GET: Staffs/Edit/5
+        // GET: Staffs/Edit/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -84,14 +109,14 @@ namespace WebApplication5.Controllers
             {
                 return NotFound();
             }
-            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "IdPasports", staff.PassportId);
-            ViewData["PositionsId"] = new SelectList(_context.Positions, "IdPositions", "IdPositions", staff.PositionsId);
+
+            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "Number", staff.PassportId);
+            ViewData["PositionsId"] = new SelectList(_context.Positions, "IdPositions", "Positions", staff.PositionsId);
             return View(staff);
         }
 
-        // POST: Staffs/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Staffs/Edit/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdStaff,Suname,Name,Fatherland,PassportId,PositionsId")] Staff staff)
@@ -121,12 +146,14 @@ namespace WebApplication5.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "IdPasports", staff.PassportId);
-            ViewData["PositionsId"] = new SelectList(_context.Positions, "IdPositions", "IdPositions", staff.PositionsId);
+
+            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "Number", staff.PassportId);
+            ViewData["PositionsId"] = new SelectList(_context.Positions, "IdPositions", "Positions", staff.PositionsId);
             return View(staff);
         }
 
-        // GET: Staffs/Delete/5
+        // GET: Staffs/Delete/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -138,6 +165,7 @@ namespace WebApplication5.Controllers
                 .Include(s => s.Passport)
                 .Include(s => s.Positions)
                 .FirstOrDefaultAsync(m => m.IdStaff == id);
+
             if (staff == null)
             {
                 return NotFound();
@@ -146,7 +174,8 @@ namespace WebApplication5.Controllers
             return View(staff);
         }
 
-        // POST: Staffs/Delete/5
+        // POST: Staffs/Delete/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -155,9 +184,9 @@ namespace WebApplication5.Controllers
             if (staff != null)
             {
                 _context.Staff.Remove(staff);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

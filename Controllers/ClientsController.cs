@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication5.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApplication5.Controllers
 {
+    [Authorize]
     public class ClientsController : Controller
     {
         private readonly MedelStoreContext _context;
@@ -18,14 +19,35 @@ namespace WebApplication5.Controllers
             _context = context;
         }
 
-        // GET: Clients
+        // GET: Clients (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Index()
         {
-            var medelStoreContext = _context.Clients.Include(c => c.Adress).Include(c => c.Passport);
-            return View(await medelStoreContext.ToListAsync());
+            if (!User.IsInRole("Staff"))
+            {
+                return RedirectToAction("List");
+            }
+
+            var clients = await _context.Clients
+                .Include(c => c.Adress)
+                .Include(c => c.Passport)
+                .ToListAsync();
+
+            return View(clients);
         }
 
-        // GET: Clients/Details/5
+        // GET: Clients/List (для всех авторизованных)
+        public async Task<IActionResult> List()
+        {
+            var clients = await _context.Clients
+                .Include(c => c.Adress)
+                .Include(c => c.Passport)
+                .ToListAsync();
+
+            return View("ReadOnlyList", clients);
+        }
+
+        // GET: Clients/Details/5 (для всех авторизованных)
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -37,6 +59,7 @@ namespace WebApplication5.Controllers
                 .Include(c => c.Adress)
                 .Include(c => c.Passport)
                 .FirstOrDefaultAsync(m => m.IdClients == id);
+
             if (client == null)
             {
                 return NotFound();
@@ -45,17 +68,17 @@ namespace WebApplication5.Controllers
             return View(client);
         }
 
-        // GET: Clients/Create
+        // GET: Clients/Create (только для Staff)
+        [Authorize(Roles = "Staff")]
         public IActionResult Create()
         {
-            ViewData["AdressId"] = new SelectList(_context.Adresses, "IdAdress", "IdAdress");
-            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "IdPasports");
+            ViewData["AdressId"] = new SelectList(_context.Adresses, "IdAdress", "Street");
+            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "Number");
             return View();
         }
 
-        // POST: Clients/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Clients/Create (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdClients,Suname,Name,Fatherland,DateOfBirth,AdressId,PassportId")] Client client)
@@ -66,12 +89,14 @@ namespace WebApplication5.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AdressId"] = new SelectList(_context.Adresses, "IdAdress", "IdAdress", client.AdressId);
-            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "IdPasports", client.PassportId);
+
+            ViewData["AdressId"] = new SelectList(_context.Adresses, "IdAdress", "Street", client.AdressId);
+            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "Number", client.PassportId);
             return View(client);
         }
 
-        // GET: Clients/Edit/5
+        // GET: Clients/Edit/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -84,14 +109,14 @@ namespace WebApplication5.Controllers
             {
                 return NotFound();
             }
-            ViewData["AdressId"] = new SelectList(_context.Adresses, "IdAdress", "IdAdress", client.AdressId);
-            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "IdPasports", client.PassportId);
+
+            ViewData["AdressId"] = new SelectList(_context.Adresses, "IdAdress", "Street", client.AdressId);
+            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "Number", client.PassportId);
             return View(client);
         }
 
-        // POST: Clients/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Clients/Edit/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdClients,Suname,Name,Fatherland,DateOfBirth,AdressId,PassportId")] Client client)
@@ -121,12 +146,14 @@ namespace WebApplication5.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AdressId"] = new SelectList(_context.Adresses, "IdAdress", "IdAdress", client.AdressId);
-            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "IdPasports", client.PassportId);
+
+            ViewData["AdressId"] = new SelectList(_context.Adresses, "IdAdress", "Street", client.AdressId);
+            ViewData["PassportId"] = new SelectList(_context.Pasports, "IdPasports", "Number", client.PassportId);
             return View(client);
         }
 
-        // GET: Clients/Delete/5
+        // GET: Clients/Delete/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -138,6 +165,7 @@ namespace WebApplication5.Controllers
                 .Include(c => c.Adress)
                 .Include(c => c.Passport)
                 .FirstOrDefaultAsync(m => m.IdClients == id);
+
             if (client == null)
             {
                 return NotFound();
@@ -146,7 +174,8 @@ namespace WebApplication5.Controllers
             return View(client);
         }
 
-        // POST: Clients/Delete/5
+        // POST: Clients/Delete/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -155,9 +184,9 @@ namespace WebApplication5.Controllers
             if (client != null)
             {
                 _context.Clients.Remove(client);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

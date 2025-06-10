@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication5.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApplication5.Controllers
 {
+    [Authorize]
     public class PostavhiksController : Controller
     {
         private readonly MedelStoreContext _context;
@@ -18,13 +18,24 @@ namespace WebApplication5.Controllers
             _context = context;
         }
 
-        // GET: Postavhiks
+        // GET: Postavhiks (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Index()
         {
+            if (!User.IsInRole("Staff"))
+            {
+                return RedirectToAction("List");
+            }
             return View(await _context.Postavhiks.ToListAsync());
         }
 
-        // GET: Postavhiks/Details/5
+        // GET: Postavhiks/List (для всех авторизованных)
+        public async Task<IActionResult> List()
+        {
+            return View("ReadOnlyList", await _context.Postavhiks.ToListAsync());
+        }
+
+        // GET: Postavhiks/Details/5 (для всех авторизованных)
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -42,15 +53,15 @@ namespace WebApplication5.Controllers
             return View(postavhik);
         }
 
-        // GET: Postavhiks/Create
+        // GET: Postavhiks/Create (только для Staff)
+        [Authorize(Roles = "Staff")]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Postavhiks/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Postavhiks/Create (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdPostavchik,Name,Contact")] Postavhik postavhik)
@@ -64,7 +75,8 @@ namespace WebApplication5.Controllers
             return View(postavhik);
         }
 
-        // GET: Postavhiks/Edit/5
+        // GET: Postavhiks/Edit/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -80,9 +92,8 @@ namespace WebApplication5.Controllers
             return View(postavhik);
         }
 
-        // POST: Postavhiks/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Postavhiks/Edit/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdPostavchik,Name,Contact")] Postavhik postavhik)
@@ -115,7 +126,8 @@ namespace WebApplication5.Controllers
             return View(postavhik);
         }
 
-        // GET: Postavhiks/Delete/5
+        // GET: Postavhiks/Delete/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -133,7 +145,8 @@ namespace WebApplication5.Controllers
             return View(postavhik);
         }
 
-        // POST: Postavhiks/Delete/5
+        // POST: Postavhiks/Delete/5 (только для Staff)
+        [Authorize(Roles = "Staff")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -142,9 +155,9 @@ namespace WebApplication5.Controllers
             if (postavhik != null)
             {
                 _context.Postavhiks.Remove(postavhik);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
